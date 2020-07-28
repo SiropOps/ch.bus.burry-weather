@@ -79,14 +79,14 @@ class Data(object):
     def __repr__(self):
         return str(self.__dict__)
 
-def failOver():
+def failOver(b):
     try:
         logger.info('failOver Started Script')
-        gpsp.start()  # start it up
-        for _ in itertools.repeat(None, 300):  # repeat 5 minutes
+
+        for _ in itertools.repeat(None, 2):  # repeat 10 minutes
             with open(FAIL_DIR + str(uuid.uuid1()) + '.smart-sensor.json', 'w') as outfile:
-                json.dump(Data(gpsd).__dict__, outfile)
-                time.sleep(1)  # set to whatever
+                json.dump(Data(b).__dict__, outfile)
+                time.sleep(300)  # set to whatever
         gpsp.running = False
         logger.info("failOver is done.\nExiting. at " + strftime("%d-%m-%Y %H:%M:%S", gmtime()));
     except Exception as e:
@@ -95,7 +95,6 @@ def failOver():
 
 def failBack(channel):
     try:
-        logger.info('failBack Started Script')
         for file in os.listdir(FAIL_DIR):
             try:
                 if file.endswith(".smart-sensor.json"):
@@ -129,18 +128,19 @@ if __name__ == '__main__':
                 if connection.is_open:
                     channel = connection.channel()
                     channel.queue_declare(queue='smart-sensor')
+                    failBack(channel)
                     channel.basic_publish(exchange='',
                             routing_key='smart-sensor',
                             properties=pika.BasicProperties(content_type='application/json'),
                             body=json.dumps(Data(b).__dict__)) 
                 else:
                     logger.error('RabbitMQ is not connected at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
-                    failOver()
+                    failOver(b)
                     sys.exit(os.EX_SOFTWARE)
             except Exception as e:
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 logger.error(str(e))
-                failOver()
+                failOver(b)
                 sys.exit(os.EX_SOFTWARE)
 
             time.sleep(300)  # set to whatever
