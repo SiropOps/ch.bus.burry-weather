@@ -114,7 +114,7 @@ def failBack(channel):
 
 logger.info('Start Script at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
-time.sleep(15)
+time.sleep(60)
 
 logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
