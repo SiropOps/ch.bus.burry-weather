@@ -42,6 +42,9 @@ class MyLogger(object):
         # Only log if there is a message (not just a new line)
         if message.rstrip() != "":
             self.logger.log(self.level, message.rstrip())
+    
+    def flush(self):
+        pass
 
 
 # Configure logging to log to a file, making a new file at midnight and keeping the last 3 day's data
@@ -83,7 +86,7 @@ def failOver(b):
     try:
         logger.info('failOver Started Script')
 
-        for _ in itertools.repeat(None, 2):  # repeat 10 minutes
+        for _ in itertools.repeat(None, 1):  # repeat 5 minutes
             with open(FAIL_DIR + str(uuid.uuid1()) + '.smart-sensor.json', 'w') as outfile:
                 json.dump(Data(b).__dict__, outfile)
                 time.sleep(300)  # set to whateve
