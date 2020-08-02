@@ -24,6 +24,8 @@ public class WeatherService {
   @Autowired
   private GpsClient gpsClient;
 
+  private OutsideDTO lastOutside = null;
+
   private boolean isNull(Double value) {
     return (value == null ? true : Double.isNaN(value));
   }
@@ -39,10 +41,18 @@ public class WeatherService {
 
     log.info("Received message as specific class: {}", outsideMessage.toString());
 
+    outsideMessage.setTime(this.gpsClient.getSpeakingClock().getDate());
+
     Outside outside = new Outside();
     BeanUtils.copyProperties(outsideMessage, outside);
-    outside.setTime(this.gpsClient.getSpeakingClock().getDate());
+
     this.outsideRepository.save(outside);
+
+    lastOutside = outsideMessage;
+  }
+
+  public OutsideDTO getLast() {
+    return lastOutside;
   }
 
 }
