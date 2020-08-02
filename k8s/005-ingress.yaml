@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute-weather
+  namespace: burry
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`<IP>`) && PathPrefix(`/api/weather`)  
+    kind: Rule
+    services:
+    - name: weather
+      port: 8012

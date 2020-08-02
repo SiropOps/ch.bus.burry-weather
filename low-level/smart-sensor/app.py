@@ -86,12 +86,10 @@ def failOver(b):
         for _ in itertools.repeat(None, 2):  # repeat 10 minutes
             with open(FAIL_DIR + str(uuid.uuid1()) + '.smart-sensor.json', 'w') as outfile:
                 json.dump(Data(b).__dict__, outfile)
-                time.sleep(300)  # set to whatever
-        gpsp.running = False
+                time.sleep(300)  # set to whateve
         logger.info("failOver is done.\nExiting. at " + strftime("%d-%m-%Y %H:%M:%S", gmtime()));
     except Exception as e:
         logger.error('failOver error: ' + str(e))
-        gpsp.running = False
 
 def failBack(channel):
     try:

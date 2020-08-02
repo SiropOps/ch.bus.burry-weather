@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  burry-weather-db:
+    build: .
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=weather_buffer
+      - POSTGRES_USER=weather_buffer_user
+      - POSTGRES_PASSWORD=weather_buffer_pass

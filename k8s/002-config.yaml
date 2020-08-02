@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weather-config-map
+  namespace: burry
+data:
+  config.properties: |
+    spring.datasource.url=jdbc:postgresql://[HOST]:[PORT]/[DATABASE]
+    spring.rabbitmq.host=<HOST>
+    spring.rabbitmq.port=<PORT>

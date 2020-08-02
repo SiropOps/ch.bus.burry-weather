@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather
+  namespace: burry
+spec:
+  ports:
+    - name: http-weather
+      protocol: TCP
+      port: 8012
+      targetPort: 8012
+  selector:
+    app: app-weather
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather
+  namespace: burry
+spec:
+  selector:
+    matchLabels:
+      app: app-weather
+  template:
+    metadata:
+      labels:
+        app: app-weather
+    spec:
+      volumes:
+      - name: weather-properties
+        configMap:
+          name: weather-config-map
+      - name: weather-credentials
+        emptyDir: {}
+      containers:
+      - name: weather
+        image: siropops/burry-weather:0.0.1-SNAPSHOT
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8012
+          initialDelaySeconds: 120
+          timeoutSeconds: 3
+          failureThreshold: 3
+        ports:
+        - containerPort: 8012
+          protocol: TCP
+        volumeMounts:
+        - name: weather-properties
+          mountPath: /app/properties
+          readOnly: true
+        - name: weather-credentials
+          mountPath: /app/credentials
+          readOnly: true
+      initContainers:
+      - name: weather-init
+        image: siropops/burry-weather-confd:0.0.1-SNAPSHOT
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: weather-secret
+              key: spring.datasource.username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: weather-secret
+              key: spring.datasource.password
+        - name: SPRING_RABBITMQ_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: weather-secret
+              key: spring.rabbitmq.username
+        - name: SPRING_RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: weather-secret
+              key: spring.rabbitmq.password
+        volumeMounts:
+        - name: weather-credentials
+          mountPath: /app/credentials
