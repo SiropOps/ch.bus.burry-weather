@@ -90,7 +90,7 @@ def failOver(b):
             with open(FAIL_DIR + str(uuid.uuid1()) + '.smart-sensor.json', 'w') as outfile:
                 json.dump(Data(b).__dict__, outfile)
                 time.sleep(300)  # set to whateve
-        logger.info("failOver is done.\nExiting. at " + strftime("%d-%m-%Y %H:%M:%S", gmtime()));
+        logger.info("failOver is done");
     except Exception as e:
         logger.error('failOver error: ' + str(e))
 
@@ -114,42 +114,51 @@ def failBack(channel):
 
 logger.info('Start Script at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
-time.sleep(300)
+time.sleep(10)
 
 logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
 if __name__ == '__main__':
-    b = BeewiSmartClimPoller(os.environ['beewi.mac'])
-    try:
-        while True:
+    while True:
+        try:
+            b = BeewiSmartClimPoller(os.environ['beewi.mac'])
             b.update_sensor()
+            is_connected = False
             try:
                 credentials = pika.PlainCredentials(os.environ['spring.rabbitmq.username'], os.environ['spring.rabbitmq.password'])
                 connection = pika.BlockingConnection(pika.ConnectionParameters(os.environ['spring.rabbitmq.host'], os.environ['spring.rabbitmq.port'], '/', credentials))
                 if connection.is_open:
                     channel = connection.channel()
                     channel.queue_declare(queue='smart-sensor')
-                    failBack(channel)
                     channel.basic_publish(exchange='',
                             routing_key='smart-sensor',
                             properties=pika.BasicProperties(content_type='application/json'),
                             body=json.dumps(Data(b).__dict__)) 
+                    is_connected = True
+                    logger.info('RabbitMQ is started at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 else:
                     logger.error('RabbitMQ is not connected at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                     failOver(b)
-                    sys.exit(os.EX_SOFTWARE)
             except Exception as e:
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
-                logger.error(str(e))
                 failOver(b)
-                sys.exit(os.EX_SOFTWARE)
+            
+            if is_connected:
+                failBack(channel)
+                while True:
+                    time.sleep(300)
+                    b.update_sensor()
+                    channel.basic_publish(exchange='',
+                            routing_key='smart-sensor',
+                            properties=pika.BasicProperties(content_type='application/json'),
+                            body=json.dumps(Data(b).__dict__)) 
+                    
+            if is_connected:
+                connection.close()
 
-            time.sleep(300)  # set to whatever
-    
-        connection.close()
-        logger.info("Done.\nExiting. at " + strftime("%d-%m-%Y %H:%M:%S", gmtime()));
+        except Exception as e:
+            logger.error('General error: ' + str(e))
+            logger.info('Sleep one hour')
+            time.sleep(3600) # one hour
 
-    except Exception as e:
-        logger.error('General error: ' + str(e))
-        sys.exit(os.EX_SOFTWARE)
-        
+    sys.exit(os.EX_SOFTWARE)   
