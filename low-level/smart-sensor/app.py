@@ -75,7 +75,9 @@ sys.stderr = MyLogger(logger, logging.ERROR)
 class Data(object): 
 
     def __init__(self, sensor): 
-        self.temperature = sensor.get_temperature() - 4
+        self.temperature = None
+        if sensor.get_temperature() is not None:
+            self.temperature = sensor.get_temperature() - 4
         self.humidity = sensor.get_humidity()
         self.battery = sensor.get_battery()
     
