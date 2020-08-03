@@ -82,6 +82,7 @@ class Data(object):
     def __repr__(self):
         return str(self.__dict__)
 
+
 def failOver(b):
     try:
         logger.info('failOver Started Script')
@@ -93,6 +94,7 @@ def failOver(b):
         logger.info("failOver is done");
     except Exception as e:
         logger.error('failOver error: ' + str(e))
+
 
 def failBack(channel):
     try:
@@ -126,7 +128,7 @@ if __name__ == '__main__':
             is_connected = False
             try:
                 credentials = pika.PlainCredentials(os.environ['spring.rabbitmq.username'], os.environ['spring.rabbitmq.password'])
-                connection = pika.BlockingConnection(pika.ConnectionParameters(os.environ['spring.rabbitmq.host'], os.environ['spring.rabbitmq.port'], '/', credentials))
+                connection = pika.BlockingConnection(pika.ConnectionParameters(host=os.environ['spring.rabbitmq.host'], port=os.environ['spring.rabbitmq.port'], virtual_host='/', credentials=credentials, heartbeat=600))
                 if connection.is_open:
                     channel = connection.channel()
                     channel.queue_declare(queue='smart-sensor')
@@ -159,6 +161,6 @@ if __name__ == '__main__':
         except Exception as e:
             logger.error('General error: ' + str(e))
             logger.info('Sleep one hour')
-            time.sleep(3600) # one hour
+            time.sleep(3600)  # one hour
 
     sys.exit(os.EX_SOFTWARE)   
