@@ -17,6 +17,7 @@ import time
 import uuid
 import board
 import adafruit_dht
+import pika
 
 sys.path.insert(0, "/usr/local/bin")
 
@@ -144,10 +145,11 @@ if __name__ == '__main__':
                     logger.info('RabbitMQ is started at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 else:
                     logger.error('RabbitMQ is not connected at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
-                    failOver(b)
+                    failOver(dhtDevice)
             except Exception as e:
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
-                failOver(b)
+                traceback.print_exc(2, file=sys.stdout)
+                failOver(dhtDevice)
             
             if is_connected:
                 failBack(channel)
