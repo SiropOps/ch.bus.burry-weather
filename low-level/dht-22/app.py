@@ -140,7 +140,7 @@ if __name__ == '__main__':
                     channel.basic_publish(exchange='',
                             routing_key='dht-22',
                             properties=pika.BasicProperties(content_type='application/json'),
-                            body=json.dumps(Data(b).__dict__)) 
+                            body=json.dumps(Data(dhtDevice).__dict__)) 
                     is_connected = True
                     logger.info('RabbitMQ is started at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 else:
