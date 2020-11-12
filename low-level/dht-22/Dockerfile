@@ -7,6 +7,7 @@ RUN apt-get -y update -qq && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/* && \
 	rm -rf /tmp/* /var/tmp/* && \
+    pip3 install pika && \
 	pip3 install adafruit-circuitpython-dht
 	
 COPY ./app.py /app/
