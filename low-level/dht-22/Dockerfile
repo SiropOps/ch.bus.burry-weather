@@ -3,7 +3,8 @@ FROM resin/rpi-raspbian:buster
 LABEL  maintainer="SiropOps <Cyril_Boillat@hotmail.com>"
 
 RUN apt-get -y update -qq && \
-	apt-get -y install python3 python3-pip make build-essential libglib2.0-dev libffi-dev python-dev python3-setuptools libgpiod2 vim && \
+	apt-get -y install python3 python3-pip make build-essential libglib2.0-dev libffi-dev python3-dev python3-setuptools python3-rpi.gpio libgpiod2 vim && \
+	apt-get -y install picap &&	picap-setup && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/* && \
 	rm -rf /tmp/* /var/tmp/* && \
