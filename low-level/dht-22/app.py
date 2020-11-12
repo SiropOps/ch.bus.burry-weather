@@ -81,7 +81,6 @@ class Data(object):
         except Exception as error:
             self.temperature = None
             self.humidity = None
-            continue
                 
     def __repr__(self):
         return str(self.__dict__)
