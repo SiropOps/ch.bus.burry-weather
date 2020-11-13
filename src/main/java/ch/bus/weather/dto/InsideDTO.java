@@ -5,13 +5,12 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OutsideDTO implements Serializable {
+public class InsideDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private Double temperature;
   private Double humidity;
-  private Double battery;
   private Date time;
 
   public Double getTemperature() {
@@ -30,14 +29,6 @@ public class OutsideDTO implements Serializable {
     this.humidity = humidity;
   }
 
-  public Double getBattery() {
-    return battery;
-  }
-
-  public void setBattery(Double battery) {
-    this.battery = battery;
-  }
-
   public Date getTime() {
     return time;
   }
@@ -48,8 +39,8 @@ public class OutsideDTO implements Serializable {
 
   @Override
   public String toString() {
-    return "OutsideDTO [temperature=" + temperature + ", humidity=" + humidity + ", battery="
-        + battery + ", time=" + time + "]";
+    return "OutsideDTO [temperature=" + temperature + ", humidity=" + humidity + ", time=" + time
+        + "]";
   }
 
 }

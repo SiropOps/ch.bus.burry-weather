@@ -1,5 +1,6 @@
 package ch.bus.weather.service;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -8,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ch.bus.weather.client.GpsClient;
+import ch.bus.weather.dto.InsideDTO;
 import ch.bus.weather.dto.OutsideDTO;
+import ch.bus.weather.entity.Inside;
 import ch.bus.weather.entity.Outside;
+import ch.bus.weather.repository.InsideRepository;
 import ch.bus.weather.repository.OutsideRepository;
 
 @Service
@@ -22,9 +26,13 @@ public class WeatherService {
   private OutsideRepository outsideRepository;
 
   @Autowired
+  private InsideRepository insideRepository;
+
+  @Autowired
   private GpsClient gpsClient;
 
   private OutsideDTO lastOutside = null;
+  private InsideDTO lastInside = null;
 
   private boolean isNull(Double value) {
     return (value == null ? true : Double.isNaN(value));
@@ -51,8 +59,38 @@ public class WeatherService {
     lastOutside = outsideMessage;
   }
 
-  public OutsideDTO getLast() {
+  public OutsideDTO getLastOutside() {
     return lastOutside;
+  }
+
+
+  @Transactional
+  @RabbitListener(queues = "dht-22")
+  public void receiveMessage(final InsideDTO insideMessage) {
+    if (insideMessage == null || !RUNNING)
+      return;
+
+    if (isNull(insideMessage.getTemperature()) || isNull(insideMessage.getHumidity()))
+      return;
+
+    log.info("Received message as specific class: {}", insideMessage.toString());
+
+    if (!isNull(Optional.ofNullable(lastInside).orElse(new InsideDTO()).getTemperature())
+        && lastInside.getTemperature().equals(insideMessage.getTemperature()))
+      return;
+
+    insideMessage.setTime(this.gpsClient.getSpeakingClock().getDate());
+
+    Inside inside = new Inside();
+    BeanUtils.copyProperties(insideMessage, inside);
+
+    this.insideRepository.save(inside);
+
+    lastInside = insideMessage;
+  }
+
+  public InsideDTO getLastInside() {
+    return lastInside;
   }
 
 }

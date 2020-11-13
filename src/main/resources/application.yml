@@ -30,5 +30,32 @@ spring:
 #        show_sql: true
         temp:
           use_jdbc_metadata_defaults: false
+feign:
+  hystrix:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 90000
+        loggerLevel: basic
+hystrix:
+  shareSecurityContext: false
+  threadpool:
+    default:
+      coreSize: 100
+      maxQueueSize: -1
+      queueSizeRejectionThreshold: 5
+  command:
+    default:
+      circuitBreaker:
+        forceClosed: true
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE
+#          thread:
+#            timeoutInMilliseconds: 10000
 
 
