@@ -1,6 +1,8 @@
 package ch.bus.weather.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,6 +17,7 @@ import ch.bus.weather.entity.Inside;
 import ch.bus.weather.entity.Outside;
 import ch.bus.weather.repository.InsideRepository;
 import ch.bus.weather.repository.OutsideRepository;
+import ch.bus.weather.utils.CopyBean;
 
 @Service
 public class WeatherService {
@@ -91,6 +94,16 @@ public class WeatherService {
 
   public InsideDTO getLastInside() {
     return lastInside;
+  }
+
+  public List<OutsideDTO> getAllOutsides() {
+    return this.outsideRepository.findAll().stream().map(CopyBean::outside)
+        .collect(Collectors.toList());
+  }
+
+  public List<InsideDTO> getAllInsides() {
+    return this.insideRepository.findAll().stream().map(CopyBean::inside)
+        .collect(Collectors.toList());
   }
 
 }

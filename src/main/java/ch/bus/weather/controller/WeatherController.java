@@ -1,5 +1,6 @@
 package ch.bus.weather.controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,18 @@ public class WeatherController {
     return new ResponseEntity<>(this.weatherService.getLastOutside(), HttpStatus.OK);
   }
 
+  @GetMapping("/outsides")
+  public ResponseEntity<List<OutsideDTO>> getOutsides() {
+    return new ResponseEntity<>(this.weatherService.getAllOutsides(), HttpStatus.OK);
+  }
+
   @GetMapping("/inside")
   public ResponseEntity<InsideDTO> getInside() {
     return new ResponseEntity<>(this.weatherService.getLastInside(), HttpStatus.OK);
+  }
+
+  @GetMapping("/insides")
+  public ResponseEntity<List<InsideDTO>> getInsides() {
+    return new ResponseEntity<>(this.weatherService.getAllInsides(), HttpStatus.OK);
   }
 }
