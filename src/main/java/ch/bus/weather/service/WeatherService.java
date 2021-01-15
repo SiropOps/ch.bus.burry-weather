@@ -50,6 +50,9 @@ public class WeatherService {
     if (isNull(outsideMessage.getTemperature()) || isNull(outsideMessage.getHumidity()))
       return;
 
+    if (outsideMessage.getTemperature() > 80 || outsideMessage.getTemperature() < -40)
+      return;
+    
     log.info("Received message as specific class: {}", outsideMessage.toString());
 
     outsideMessage.setTime(this.gpsClient.getSpeakingClock().getDate());
@@ -74,6 +77,9 @@ public class WeatherService {
       return;
 
     if (isNull(insideMessage.getTemperature()) || isNull(insideMessage.getHumidity()))
+      return;
+    
+    if (insideMessage.getTemperature() > 80 || insideMessage.getTemperature() < -40)
       return;
 
     log.info("Received message as specific class: {}", insideMessage.toString());
