@@ -111,6 +111,7 @@ time.sleep(10)
 logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
 if __name__ == '__main__':
+    s = None
     while True:
         try:
             if(s is None):
