@@ -86,37 +86,6 @@ class Data(object):
     def __repr__(self):
         return str(self.__dict__)
 
-
-def failOver(b):
-    try:
-        logger.info('failOver Started Script')
-
-        for _ in itertools.repeat(None, 1):  # repeat 5 minutes
-            with open(FAIL_DIR + str(uuid.uuid1()) + '.smart-sensor.json', 'w') as outfile:
-                json.dump(Data(b).__dict__, outfile)
-                time.sleep(300)  # set to whateve
-        logger.info("failOver is done");
-    except Exception as e:
-        logger.error('failOver error: ' + str(e))
-
-
-def failBack(channel):
-    try:
-        for file in os.listdir(FAIL_DIR):
-            try:
-                if file.endswith(".smart-sensor.json"):
-                    data = json.load(open(FAIL_DIR + file, 'r'))
-                    channel.basic_publish(exchange='',
-                                          routing_key='smart-sensor',
-                                          properties=pika.BasicProperties(content_type='application/json'),
-                                          body=json.dumps(data))
-                    os.remove(FAIL_DIR + file)
-            except Exception as e:
-                logger.error('file ' + file + ' error: ' + str(e))
-                os.remove(FAIL_DIR + file)
-    except Exception as e:
-        logger.error('failBack error: ' + str(e))
-
 def recv(s):
 
     try:
@@ -126,9 +95,9 @@ def recv(s):
             text += data.decode("utf-8")
             if data.decode("utf-8")  == "\n":
                 break
-            return json.loads(x)
+            return json.loads(text)
     except Exception as e:
-        logger.error('failBack error: ' + str(e))
+        logger.error('recv error: ' + str(e))
     return  {
         "temperature": None,
         "humidity": None
@@ -163,13 +132,10 @@ if __name__ == '__main__':
                     logger.info('RabbitMQ is started at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 else:
                     logger.error('RabbitMQ is not connected at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
-                    failOver(b)
             except Exception as e:
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
-                failOver(b)
 
             if is_connected:
-                failBack(channel)
                 while True:
                     time.sleep(300)
                     b = recv(s)
