@@ -17,7 +17,6 @@ from time import strftime, gmtime
 import time
 import uuid
 
-from beewi_smartclim import BeewiSmartClimPoller
 import pika
 
 sys.path.insert(0, "/usr/local/bin")
