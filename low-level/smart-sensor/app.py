@@ -95,7 +95,7 @@ def recv(s):
             text += data.decode("utf-8")
             if data.decode("utf-8")  == "\n":
                 break
-            return json.loads(text)
+        return json.loads(text)
     except Exception as e:
         logger.error('recv error: ' + str(e))
     return  {
