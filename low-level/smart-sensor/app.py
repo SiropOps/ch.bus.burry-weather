@@ -113,8 +113,9 @@ logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 if __name__ == '__main__':
     while True:
         try:
-            s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-            s.connect((os.environ['beewi.mac'],PORT))
+            if(s is None):
+                s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+                s.connect((os.environ['beewi.mac'],PORT))
             b = recv(s)
             logger.info(b)
             is_connected = False
