@@ -6,6 +6,7 @@ Created on 14 sept. 2019
 @author: SiropOps
 
 '''
+import bluetooth, subprocess
 import itertools
 import json
 import logging.handlers
@@ -27,6 +28,8 @@ LOG_FILENAME = "/app/fail/smart-sensor.log"
 
 FAIL_DIR = "/app/fail/"
 
+PORT = 1         # RFCOMM port
+
 
 class MyLogger(object):
     '''
@@ -42,7 +45,7 @@ class MyLogger(object):
         # Only log if there is a message (not just a new line)
         if message.rstrip() != "":
             self.logger.log(self.level, message.rstrip())
-    
+
     def flush(self):
         pass
 
@@ -64,7 +67,7 @@ logger.addHandler(handler)
 console = logging.StreamHandler()
 console.setLevel(LOG_LEVEL)
 console.setFormatter(formatter)
-logger.addHandler(console) 
+logger.addHandler(console)
 
 # Replace stdout with logging to file at INFO level
 sys.stdout = MyLogger(logger, logging.INFO)
@@ -72,15 +75,15 @@ sys.stdout = MyLogger(logger, logging.INFO)
 sys.stderr = MyLogger(logger, logging.ERROR)
 
 
-class Data(object): 
+class Data(object):
 
-    def __init__(self, sensor): 
-        self.temperature = None
-        if sensor.get_temperature() is not None:
-            self.temperature = sensor.get_temperature() - 4
-        self.humidity = sensor.get_humidity()
-        self.battery = sensor.get_battery()
-    
+    def __init__(self, sensor):
+        self.temperature = sensor["temperature"]
+        # if sensor.get_temperature() is not None:
+        #     self.temperature = sensor.get_temperature() - 4
+        self.humidity = sensor["humidity"]
+        self.battery = 0
+
     def __repr__(self):
         return str(self.__dict__)
 
@@ -107,13 +110,30 @@ def failBack(channel):
                     channel.basic_publish(exchange='',
                                           routing_key='smart-sensor',
                                           properties=pika.BasicProperties(content_type='application/json'),
-                                          body=json.dumps(data)) 
+                                          body=json.dumps(data))
                     os.remove(FAIL_DIR + file)
             except Exception as e:
                 logger.error('file ' + file + ' error: ' + str(e))
                 os.remove(FAIL_DIR + file)
     except Exception as e:
         logger.error('failBack error: ' + str(e))
+
+def recv(s):
+
+    try:
+        text = ""
+        while 1:
+            data = s.recv(1) # Buffer size
+            text += data.decode("utf-8")
+            if data.decode("utf-8")  == "\n":
+                break
+            return json.loads(x)
+    except Exception as e:
+        logger.error('failBack error: ' + str(e))
+    return  {
+        "temperature": None,
+        "humidity": None
+    }
 
 
 logger.info('Start Script at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
@@ -125,8 +145,10 @@ logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 if __name__ == '__main__':
     while True:
         try:
-            b = BeewiSmartClimPoller(os.environ['beewi.mac'])
-            b.update_sensor()
+            s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+            s.connect((os.environ['beewi.mac'],PORT))
+            b = recv(s)
+            logger.info(b)
             is_connected = False
             try:
                 credentials = pika.PlainCredentials(os.environ['spring.rabbitmq.username'], os.environ['spring.rabbitmq.password'])
@@ -137,7 +159,7 @@ if __name__ == '__main__':
                     channel.basic_publish(exchange='',
                             routing_key='smart-sensor',
                             properties=pika.BasicProperties(content_type='application/json'),
-                            body=json.dumps(Data(b).__dict__)) 
+                            body=json.dumps(Data(b).__dict__))
                     is_connected = True
                     logger.info('RabbitMQ is started at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 else:
@@ -146,17 +168,18 @@ if __name__ == '__main__':
             except Exception as e:
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 failOver(b)
-            
+
             if is_connected:
                 failBack(channel)
                 while True:
                     time.sleep(300)
-                    b.update_sensor()
+                    b = recv(s)
+                    logger.info(b)
                     channel.basic_publish(exchange='',
                             routing_key='smart-sensor',
                             properties=pika.BasicProperties(content_type='application/json'),
-                            body=json.dumps(Data(b).__dict__)) 
-                    
+                            body=json.dumps(Data(b).__dict__))
+
             if is_connected:
                 connection.close()
 
@@ -165,4 +188,4 @@ if __name__ == '__main__':
             logger.info('Sleep one hour')
             time.sleep(3600)  # one hour
 
-    sys.exit(os.EX_SOFTWARE)   
+    sys.exit(os.EX_SOFTWARE)
