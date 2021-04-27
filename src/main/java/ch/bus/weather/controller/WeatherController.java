@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ch.bus.weather.dto.InsideDTO;
+import ch.bus.weather.dto.MonlesiDTO;
 import ch.bus.weather.dto.OutsideDTO;
 import ch.bus.weather.service.WeatherService;
 
@@ -36,5 +37,15 @@ public class WeatherController {
   @GetMapping("/insides")
   public ResponseEntity<List<InsideDTO>> getInsides() {
     return new ResponseEntity<>(this.weatherService.getAllInsides(), HttpStatus.OK);
+  }
+
+  @GetMapping("/monlesi")
+  public ResponseEntity<MonlesiDTO> getMonlesi() {
+    return new ResponseEntity<>(this.weatherService.getLastMonlesi(), HttpStatus.OK);
+  }
+
+  @GetMapping("/monlesis")
+  public ResponseEntity<List<MonlesiDTO>> getMonlesis() {
+    return new ResponseEntity<>(this.weatherService.getAllMonlesis(), HttpStatus.OK);
   }
 }

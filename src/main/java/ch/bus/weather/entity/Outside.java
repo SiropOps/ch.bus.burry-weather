@@ -2,6 +2,7 @@ package ch.bus.weather.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "weather_outside")
-public class Outside implements Serializable {
+public class Outside implements Serializable, Comparable<Outside> {
 
   private static final long serialVersionUID = 1L;
 
@@ -74,6 +75,15 @@ public class Outside implements Serializable {
   public String toString() {
     return "Outside [id=" + id + ", temperature=" + temperature + ", humidity=" + humidity
         + ", battery=" + battery + ", time=" + time + "]";
+  }
+
+  @Override
+  public int compareTo(Outside o) {
+    if (!Optional.ofNullable(o).isPresent())
+      return 1;
+    if (Optional.ofNullable(this.time).isPresent() && Optional.ofNullable(o.time).isPresent())
+      return this.time.compareTo(o.time);
+    return Long.compare(this.id, o.id);
   }
 
 
