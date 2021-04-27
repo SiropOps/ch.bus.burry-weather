@@ -13,7 +13,10 @@ RUN apt-get -y update -qq && \
 	rm -rf /var/lib/apt/lists/* && \
 	rm -rf /tmp/* /var/tmp/* && \
 	pip3 install pika && \
-	pip3 install pybluez
+	pip3 install pybluez && \
+	pip3 install bluepy && \
+	pip3 install btlewrap && \
+	cd && echo 'set mouse-=a' > .vimrc
 
 COPY ./app.py /app/
 
