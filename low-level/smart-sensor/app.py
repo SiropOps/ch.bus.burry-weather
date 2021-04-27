@@ -100,7 +100,7 @@ def convert_to_text(results):
     return " ".join(hex_results)
 
 #Function to send a string to the device as a bytearray and return the results received
-def write_bytes(vals):
+def write_bytes(vals,tx ,rx):
     write_val = bytearray.fromhex(vals)
     tx.write(write_val)
     read_val = rx.read()
@@ -130,7 +130,7 @@ def recv(dev):
         rx = dev.getCharacteristics(uuid=RX_CHAR_UUID)[0]
 
         #Send initial command to get the number of available data points
-        response = write_bytes("0100000000")
+        response = write_bytes("0100000000", tx, rx)
         #The number of available values is stored in the second and third bytes of the response, little endian order
         available = int.from_bytes(response[1:3], byteorder='little')
 
@@ -149,7 +149,7 @@ def recv(dev):
             #build the request string to be sent to the device
             hex_string = "07" + index_hex_reversed + "000003"
             #send the request and get the response
-            response = write_bytes(hex_string)
+            response = write_bytes(hex_string, tx, rx)
             #convert the response to temperature and humidity readings
             convert_to_readings(response)
         dev.disconnect()
