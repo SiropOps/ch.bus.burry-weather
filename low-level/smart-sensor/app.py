@@ -29,7 +29,7 @@ RX_CHAR_UUID = btle.UUID('0000fff3-0000-1000-8000-00805F9B34FB')
 
 # Deafults
 LOG_LEVEL = logging.INFO  # Could be e.g. "DEBUG" or "WARNING"
-LOG_FILENAME = "/app/fail/smart-sensor.log"
+LOG_FILENAME = '/app/fail/'+os.environ['spring.rabbitmq.queue']+'.log'
 
 FAIL_DIR = "/app/fail/"
 
@@ -185,9 +185,9 @@ if __name__ == '__main__':
                 connection = pika.BlockingConnection(pika.ConnectionParameters(host=os.environ['spring.rabbitmq.host'], port=os.environ['spring.rabbitmq.port'], virtual_host='/', credentials=credentials, heartbeat=600))
                 if connection.is_open:
                     channel = connection.channel()
-                    channel.queue_declare(queue='smart-sensor')
+                    channel.queue_declare(queue=os.environ['spring.rabbitmq.queue'])
                     channel.basic_publish(exchange='',
-                            routing_key='smart-sensor',
+                            routing_key=os.environ['spring.rabbitmq.queue'],
                             properties=pika.BasicProperties(content_type='application/json'),
                             body=json.dumps(Data(b).__dict__))
                     is_connected = True
@@ -204,7 +204,7 @@ if __name__ == '__main__':
                     b = recv(s)
                     logger.info(b)
                     channel.basic_publish(exchange='',
-                            routing_key='smart-sensor',
+                            routing_key=os.environ['spring.rabbitmq.queue'],
                             properties=pika.BasicProperties(content_type='application/json'),
                             body=json.dumps(Data(b).__dict__))
 
