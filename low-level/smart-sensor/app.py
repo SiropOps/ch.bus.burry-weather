@@ -116,11 +116,29 @@ def convert_to_readings(response):
         if reading > 2048:
             reading = -1 * (4096-reading)
         readings.append("{:.2f}".format(reading))
-    print(",".join(readings))
-
+    logger.debug(",".join(readings))
+    for w in range(2, 0, -1):
+        if float(readings[w]) != 0.00:
+           return {"temperature": float(readings[w]), "humidity": float(readings[w+3])}
+    return None
 #Function to recived data
 def getFakeData():
     return {"temperature": -50.0, "humidity": -50.0}
+
+def getDataPoint(available, tx, rx, delta=0):
+    #Data is returned as three pairs of temperature and humidity values
+    data_point = int(available / 3) + delta
+    index = data_point * 3
+    #convert index to hex, padded with leading zeroes
+    index_hex = hex(index)[2:].zfill(4)
+    #reverse the byte order of the hex values
+    index_hex_reversed = index_hex[2:] + index_hex[0:2]
+    #build the request string to be sent to the device
+    hex_string = "07" + index_hex_reversed + "000003"
+    #send the request and get the response
+    response = write_bytes(hex_string, tx, rx)
+    #convert the response to temperature and humidity readings
+    return convert_to_readings(response)
 
 #Function to recived data
 def recv(dev):
@@ -134,26 +152,16 @@ def recv(dev):
         #The number of available values is stored in the second and third bytes of the response, little endian order
         available = int.from_bytes(response[1:3], byteorder='little')
 
-        logger.info("There are {} available data points from this device".format(available))
+        sensor = getDataPoint(available, tx, rx, 1)
+        if sensor is None:
+            logger.debug('sensor is none')
+            sensor = getDataPoint(available,tx, rx)
+        if sensor is None:
+            logger.debug('sensor is none')
+            sensor = getDataPoint(available,tx, rx, -1)
 
-
-        #Data is returned as three pairs of temperature and humidity values
-        for data_point in range(int(available / 3)):
-            index = data_point * 3
-            #print index for reference
-            print(str(index).zfill(4),": ",end='')
-            #convert index to hex, padded with leading zeroes
-            index_hex = hex(index)[2:].zfill(4)
-            #reverse the byte order of the hex values
-            index_hex_reversed = index_hex[2:] + index_hex[0:2]
-            #build the request string to be sent to the device
-            hex_string = "07" + index_hex_reversed + "000003"
-            #send the request and get the response
-            response = write_bytes(hex_string, tx, rx)
-            #convert the response to temperature and humidity readings
-            convert_to_readings(response)
         dev.disconnect()
-
+        return sensor
 
     except Exception as e:
         logger.error('General error: ' + str(e))
@@ -174,11 +182,11 @@ if __name__ == '__main__':
             try:
                 dev = btle.Peripheral(os.environ['beewi.mac'])
                 b = recv(dev)
+                logger.info(b)
             except:
-                logger.error('Failed to connect at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
+                logger.error('Failed to connect at ThermoBeCon ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 b = getFakeData();
 
-            logger.info(b)
             is_connected = False
             try:
                 credentials = pika.PlainCredentials(os.environ['spring.rabbitmq.username'], os.environ['spring.rabbitmq.password'])
@@ -203,13 +211,16 @@ if __name__ == '__main__':
                     dev = btle.Peripheral(os.environ['beewi.mac'])
                     b = recv(s)
                     logger.info(b)
-                    channel.basic_publish(exchange='',
+                    if b is not None:
+                        channel.basic_publish(exchange='',
                             routing_key=os.environ['spring.rabbitmq.queue'],
                             properties=pika.BasicProperties(content_type='application/json'),
                             body=json.dumps(Data(b).__dict__))
 
             if is_connected:
                 connection.close()
+            else:
+                time.sleep(60)
 
         except Exception as e:
             logger.error('General error: ' + str(e))
@@ -217,3 +228,4 @@ if __name__ == '__main__':
             time.sleep(3600)  # one hour
 
     sys.exit(os.EX_SOFTWARE)
+
