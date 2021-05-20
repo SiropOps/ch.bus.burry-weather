@@ -209,7 +209,7 @@ if __name__ == '__main__':
                 while True:
                     time.sleep(300)
                     dev = btle.Peripheral(os.environ['beewi.mac'])
-                    b = recv(s)
+                    b = recv(dev)
                     logger.info(b)
                     if b is not None:
                         channel.basic_publish(exchange='',
