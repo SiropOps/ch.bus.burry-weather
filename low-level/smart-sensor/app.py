@@ -84,8 +84,8 @@ class Data(object):
 
     def __init__(self, sensor):
         self.temperature = sensor["temperature"]
-        # if sensor.get_temperature() is not None:
-        #     self.temperature = sensor.get_temperature() - 4
+        if self.temperature is not None:
+            self.temperature = self.temperature - 5
         self.humidity = sensor["humidity"]
         self.battery = 0
 
@@ -209,7 +209,7 @@ if __name__ == '__main__':
                 while True:
                     time.sleep(300)
                     dev = btle.Peripheral(os.environ['beewi.mac'])
-                    b = recv(s)
+                    b = recv(dev)
                     logger.info(b)
                     if b is not None:
                         channel.basic_publish(exchange='',
