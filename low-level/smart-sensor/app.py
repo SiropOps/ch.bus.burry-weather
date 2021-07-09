@@ -193,7 +193,7 @@ if __name__ == '__main__':
                 connection = pika.BlockingConnection(pika.ConnectionParameters(host=os.environ['spring.rabbitmq.host'], port=os.environ['spring.rabbitmq.port'], virtual_host='/', credentials=credentials, heartbeat=600))
                 if connection.is_open:
                     channel = connection.channel()
-                    channel.queue_declare(queue=os.environ['spring.rabbitmq.queue'])
+                    channel.queue_declare(queue=os.environ['spring.rabbitmq.queue'], durable=True)
                     channel.basic_publish(exchange='',
                             routing_key=os.environ['spring.rabbitmq.queue'],
                             properties=pika.BasicProperties(content_type='application/json'),

@@ -42,7 +42,7 @@ class MyLogger(object):
         # Only log if there is a message (not just a new line)
         if message.rstrip() != "":
             self.logger.log(self.level, message.rstrip())
-    
+
     def flush(self):
         pass
 
@@ -64,7 +64,7 @@ logger.addHandler(handler)
 console = logging.StreamHandler()
 console.setLevel(LOG_LEVEL)
 console.setFormatter(formatter)
-logger.addHandler(console) 
+logger.addHandler(console)
 
 # Replace stdout with logging to file at INFO level
 sys.stdout = MyLogger(logger, logging.INFO)
@@ -72,17 +72,17 @@ sys.stdout = MyLogger(logger, logging.INFO)
 sys.stderr = MyLogger(logger, logging.ERROR)
 
 
-class Data(object): 
+class Data(object):
 
-    def __init__(self, sensor): 
-              
+    def __init__(self, sensor):
+
         try:
             self.temperature = sensor.temperature - 4
             self.humidity = sensor.humidity
         except Exception as error:
             self.temperature = None
             self.humidity = None
-                
+
     def __repr__(self):
         return str(self.__dict__)
 
@@ -109,7 +109,7 @@ def failBack(channel):
                     channel.basic_publish(exchange='',
                                           routing_key='dht-22',
                                           properties=pika.BasicProperties(content_type='application/json'),
-                                          body=json.dumps(data)) 
+                                          body=json.dumps(data))
                     os.remove(FAIL_DIR + file)
             except Exception as e:
                 logger.error('file ' + file + ' error: ' + str(e))
@@ -136,11 +136,11 @@ if __name__ == '__main__':
                 connection = pika.BlockingConnection(pika.ConnectionParameters(host=os.environ['spring.rabbitmq.host'], port=os.environ['spring.rabbitmq.port'], virtual_host='/', credentials=credentials, heartbeat=600))
                 if connection.is_open:
                     channel = connection.channel()
-                    channel.queue_declare(queue='dht-22')
+                    channel.queue_declare(queue='dht-22', durable=True)
                     channel.basic_publish(exchange='',
                             routing_key='dht-22',
                             properties=pika.BasicProperties(content_type='application/json'),
-                            body=json.dumps(Data(dhtDevice).__dict__)) 
+                            body=json.dumps(Data(dhtDevice).__dict__))
                     is_connected = True
                     logger.info('RabbitMQ is started at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 else:
@@ -150,7 +150,7 @@ if __name__ == '__main__':
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 traceback.print_exc(2, file=sys.stdout)
                 failOver(dhtDevice)
-            
+
             if is_connected:
                 failBack(channel)
                 while True:
@@ -158,8 +158,8 @@ if __name__ == '__main__':
                     channel.basic_publish(exchange='',
                             routing_key='dht-22',
                             properties=pika.BasicProperties(content_type='application/json'),
-                            body=json.dumps(Data(dhtDevice).__dict__)) 
-                    
+                            body=json.dumps(Data(dhtDevice).__dict__))
+
             if is_connected:
                 connection.close()
 
@@ -168,4 +168,4 @@ if __name__ == '__main__':
             logger.info('Sleep one hour')
             time.sleep(3600)  # one hour
 
-    sys.exit(os.EX_SOFTWARE)   
+    sys.exit(os.EX_SOFTWARE)
