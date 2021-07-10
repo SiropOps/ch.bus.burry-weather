@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ch.bus.weather.dto.SpeakingClockDTO;
 
-@FeignClient(name = "gps", url = "http://192.168.8.200:8011/api/gps",
+@FeignClient(name = "gps", url = "http://192.168.8.210:8011/api/gps",
     fallbackFactory = GpsClientFallbackFactory.class)
 public interface GpsClient {
 
