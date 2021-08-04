@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM arm32v7/debian:buster
 
 LABEL  maintainer="SiropOps <Cyril_Boillat@hotmail.com>"
 
