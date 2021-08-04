@@ -1,4 +1,4 @@
-FROM arm32v7/debian:buster
+FROM balenalib/raspberry-pi:buster
 
 LABEL  maintainer="SiropOps <Cyril_Boillat@hotmail.com>"
 
