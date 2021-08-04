@@ -1,4 +1,4 @@
-FROM resin/rpi-raspbian:buster
+FROM arm32v7/debian:buster
 
 LABEL  maintainer="SiropOps <Cyril_Boillat@hotmail.com>"
 
@@ -9,7 +9,7 @@ RUN apt-get -y update -qq && \
 	rm -rf /tmp/* /var/tmp/* && \
     pip3 install pika && \
 	pip3 install adafruit-circuitpython-dht
-	
+
 COPY ./app.py /app/
 
 CMD ["python3", "/app/app.py"]
