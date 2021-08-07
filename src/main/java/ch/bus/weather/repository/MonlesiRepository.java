@@ -1,8 +1,8 @@
 package ch.bus.weather.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ch.bus.weather.entity.Monlesi;
 
-public interface MonlesiRepository extends JpaRepository<Monlesi, Long> {
+public interface MonlesiRepository extends MongoRepository<Monlesi, Long> {
 
 }

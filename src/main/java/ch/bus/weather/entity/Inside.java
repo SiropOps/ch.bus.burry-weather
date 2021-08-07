@@ -3,38 +3,28 @@ package ch.bus.weather.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
 
-@Entity
-@Table(name = "weather_inside")
+
 public class Inside implements Serializable, Comparable<Inside> {
 
   private static final long serialVersionUID = 1L;
 
-  private long id;
+  private String id;
   private Double temperature;
   private Double humidity;
 
   private Date time; // Time
 
-
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id_weather_inside")
-  public long getId() {
+  public String getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(String id) {
     this.id = id;
   }
 
-  @Column(name = "temperature")
   public Double getTemperature() {
     return temperature;
   }
@@ -43,7 +33,6 @@ public class Inside implements Serializable, Comparable<Inside> {
     this.temperature = temperature;
   }
 
-  @Column(name = "humidity")
   public Double getHumidity() {
     return humidity;
   }
@@ -52,7 +41,6 @@ public class Inside implements Serializable, Comparable<Inside> {
     this.humidity = humidity;
   }
 
-  @Column(name = "time")
   public Date getTime() {
     return time;
   }
@@ -73,7 +61,7 @@ public class Inside implements Serializable, Comparable<Inside> {
       return 1;
     if (Optional.ofNullable(this.time).isPresent() && Optional.ofNullable(o.time).isPresent())
       return this.time.compareTo(o.time);
-    return Long.compare(this.id, o.id);
+    return (Optional.ofNullable(this.id).orElse("").compareTo(o.id));
   }
 
 

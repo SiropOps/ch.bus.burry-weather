@@ -3,20 +3,13 @@ package ch.bus.weather.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
 
-@Entity
-@Table(name = "weather_monlesi")
 public class Monlesi implements Serializable, Comparable<Monlesi> {
 
   private static final long serialVersionUID = 1L;
 
-  private long id;
+  private String id;
   private Double temperature;
   private Double humidity;
   private Double battery;
@@ -25,17 +18,14 @@ public class Monlesi implements Serializable, Comparable<Monlesi> {
 
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id_weather_monlesi")
-  public long getId() {
+  public String getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(String id) {
     this.id = id;
   }
 
-  @Column(name = "temperature")
   public Double getTemperature() {
     return temperature;
   }
@@ -44,7 +34,6 @@ public class Monlesi implements Serializable, Comparable<Monlesi> {
     this.temperature = temperature;
   }
 
-  @Column(name = "humidity")
   public Double getHumidity() {
     return humidity;
   }
@@ -53,7 +42,6 @@ public class Monlesi implements Serializable, Comparable<Monlesi> {
     this.humidity = humidity;
   }
 
-  @Column(name = "battery")
   public Double getBattery() {
     return battery;
   }
@@ -62,7 +50,6 @@ public class Monlesi implements Serializable, Comparable<Monlesi> {
     this.battery = battery;
   }
 
-  @Column(name = "time")
   public Date getTime() {
     return time;
   }
@@ -83,7 +70,7 @@ public class Monlesi implements Serializable, Comparable<Monlesi> {
       return 1;
     if (Optional.ofNullable(this.time).isPresent() && Optional.ofNullable(o.time).isPresent())
       return this.time.compareTo(o.time);
-    return Long.compare(this.id, o.id);
+    return (Optional.ofNullable(this.id).orElse("").compareTo(o.id));
   }
 
 

@@ -1,8 +1,8 @@
 package ch.bus.weather.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ch.bus.weather.entity.Outside;
 
-public interface OutsideRepository extends JpaRepository<Outside, Long>, OutsideRepositoryCustom {
+public interface OutsideRepository extends MongoRepository<Outside, Long> {
 
 }
