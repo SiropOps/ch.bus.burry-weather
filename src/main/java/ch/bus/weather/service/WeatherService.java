@@ -1,5 +1,9 @@
 package ch.bus.weather.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -169,8 +173,18 @@ public class WeatherService {
   }
 
   public List<InsideDTO> getAllInsides() {
-    return this.insideRepository.findAll().stream().sorted().map(CopyBean::inside)
-        .collect(Collectors.toList());
+    return this.insideRepository.findAll().stream().map((i) -> {
+      i.setTime(Date.from(this.convertToLocalDateViaInstant(i.getTime())
+          .truncatedTo(ChronoUnit.MINUTES).atZone(ZoneId.systemDefault()).toInstant()));
+      return i;
+    }).collect(Collectors.toMap(Inside::getTime, v -> v, (v1, v2) -> v1)).values().stream().sorted()
+        .map(CopyBean::inside).collect(Collectors.toList());
+
+  }
+
+  public LocalDateTime convertToLocalDateViaInstant(Date dateToConvert) {
+    return LocalDateTime.ofInstant(
+        Optional.ofNullable(dateToConvert).orElse(new Date()).toInstant(), ZoneId.systemDefault());
   }
 
   public List<MonlesiDTO> getAllMonlesis() {
