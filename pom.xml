@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>ch.bus</groupId>
 	<artifactId>burry-weather</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4</version>
 	<name>burry-weather</name>
 	<description>BURRY-WEATHER : Manage WEATHER SENSOR on Bus</description>
 
