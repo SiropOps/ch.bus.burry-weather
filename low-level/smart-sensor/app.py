@@ -121,7 +121,7 @@ if __name__ == '__main__':
             try:
                 dev = btle.Peripheral(os.environ['sensor.mac'], addrType=btle.ADDR_TYPE_PUBLIC)
                 b = recv(dev)
-                logger.info(b)
+                logger.debug(b)
             except:
                 logger.error('Failed to connect at ThermoBeCon ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
                 b = getFakeData();
@@ -149,7 +149,7 @@ if __name__ == '__main__':
                     time.sleep(300)
                     dev = btle.Peripheral(os.environ['sensor.mac'])
                     b = recv(dev)
-                    logger.info(b)
+                    logger.debug(b)
                     if b is not None:
                         channel.basic_publish(exchange='',
                             routing_key=os.environ['spring.rabbitmq.queue'],
