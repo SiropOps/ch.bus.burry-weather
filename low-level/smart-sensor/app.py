@@ -133,6 +133,7 @@ if __name__ == '__main__':
                 if connection.is_open:
                     channel = connection.channel()
                     channel.queue_declare(queue=os.environ['spring.rabbitmq.queue'], durable=True)
+                    log.info(json.dumps(Data(b).__dict__))
                     channel.basic_publish(exchange='',
                             routing_key=os.environ['spring.rabbitmq.queue'],
                             properties=pika.BasicProperties(content_type='application/json'),
