@@ -82,7 +82,7 @@ def float_value(nums):
     logger.info(struct.unpack('<H', nums[0:2]))
     # check if temp is negative
     num = (nums[1] << 8) | nums[0]
-    if nums[1] == 0xfb:
+    if nums[1] == 0xfc:
         num = -((num ^ 0xffff) + 1)
     return float(num) / 100
 
