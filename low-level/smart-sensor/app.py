@@ -114,7 +114,7 @@ def recv(dev):
 
 logger.info('Start Script at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
-# time.sleep(360)
+time.sleep(360)
 
 logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
