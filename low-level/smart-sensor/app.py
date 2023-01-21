@@ -82,6 +82,7 @@ def float_value(nums):
     logger.info(struct.unpack('<H', nums[0:2]))
     logger.info(format(nums[1], 'b'))
     logger.info((nums[1] & 0b10000000))
+    logger.info(format((nums[1] & 0b10000000), 'b'))
     logger.info((nums[1] & 0b10000000) >> 8)
     logger.info(((nums[1] & 0b10000000) >> 8) is True)
     # check if temp is negative
