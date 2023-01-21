@@ -78,16 +78,9 @@ sys.stderr = MyLogger(logger, logging.ERROR)
 
 
 def float_value(nums):
-    logger.info(nums)
-    logger.info(struct.unpack('<H', nums[0:2]))
-    logger.info(format(nums[1], 'b'))
-    logger.info((nums[1] & 0b10000000))
-    logger.info(format((nums[1] & 0b10000000), 'b'))
-    logger.info((nums[1] & 0b10000000) >> 7)
-    logger.info(((nums[1] & 0b10000000) >> 7) is True)
     # check if temp is negative
     num = (nums[1] << 8) | nums[0]
-    if nums[1] == 0xfc:
+    if (nums[1] & 0b10000000) == 0b10000000:
         num = -((num ^ 0xffff) + 1)
     return float(num) / 100
 
