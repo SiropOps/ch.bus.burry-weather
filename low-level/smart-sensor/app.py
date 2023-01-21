@@ -28,7 +28,7 @@ RX_CHAR = 0x24
 
 # Deafults
 LOG_LEVEL = logging.INFO  # Could be e.g. "DEBUG" or "WARNING"
-LOG_FILENAME = '/app/fail/'+os.environ['spring.rabbitmq.queue']+'.log'
+LOG_FILENAME = '/app/fail/' + os.environ['spring.rabbitmq.queue'] + '.log'
 
 FAIL_DIR = "/app/fail/"
 
@@ -81,6 +81,9 @@ def float_value(nums):
     logger.info(nums)
     logger.info(struct.unpack('<H', nums[0:2]))
     logger.info(format(nums[1], 'b'))
+    logger.info((nums[1] & 0b10000000))
+    logger.info((nums[1] & 0b10000000) >> 8)
+    logger.info(((nums[1] & 0b10000000) >> 8) is True)
     # check if temp is negative
     num = (nums[1] << 8) | nums[0]
     if nums[1] == 0xfc:
@@ -117,7 +120,7 @@ def recv(dev):
 
 logger.info('Start Script at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
-#time.sleep(360)
+# time.sleep(360)
 
 logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
