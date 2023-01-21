@@ -22,7 +22,7 @@ import pika
 
 sys.path.insert(0, "/usr/local/bin")
 
-#Read Handle 0x24
+# Read Handle 0x24
 RX_CHAR = 0x24
 
 # Deafults
@@ -30,6 +30,7 @@ LOG_LEVEL = logging.INFO  # Could be e.g. "DEBUG" or "WARNING"
 LOG_FILENAME = '/app/fail/'+os.environ['spring.rabbitmq.queue']+'.log'
 
 FAIL_DIR = "/app/fail/"
+
 
 class MyLogger(object):
     '''
@@ -77,10 +78,11 @@ sys.stderr = MyLogger(logger, logging.ERROR)
 
 def float_value(nums):
     # check if temp is negative
-    num = (nums[1]<<8)|nums[0]
+    num = (nums[1] << 8) | nums[0]
     if nums[1] == 0xff:
-        num = -( (num ^ 0xffff ) + 1)
+        num = -((num ^ 0xffff) + 1)
     return float(num) / 100
+
 
 class Data(object):
 
@@ -92,11 +94,13 @@ class Data(object):
     def __repr__(self):
         return str(self.__dict__)
 
-#Function to recived data
-def getFakeData():
-    return {"temperature": -50.0, "humidity": -50.0}
 
-#Function to recived data
+# Function to recived data
+def getFakeData():
+    return {"temperature":-50.0, "humidity":-50.0}
+
+
+# Function to recived data
 def recv(dev):
     try:
         readings = dev.readCharacteristic(RX_CHAR)
@@ -109,12 +113,12 @@ def recv(dev):
 
 logger.info('Start Script at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
-time.sleep(360)
+#time.sleep(360)
 
 logger.info('Sleep end at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
 if __name__ == '__main__':
-
+    
     while True:
         dev = None
         try:
@@ -133,7 +137,7 @@ if __name__ == '__main__':
                 if connection.is_open:
                     channel = connection.channel()
                     channel.queue_declare(queue=os.environ['spring.rabbitmq.queue'], durable=True)
-                    log.info(json.dumps(Data(b).__dict__))
+                    log.info('Data : ' + json.dumps(Data(b).__dict__))
                     channel.basic_publish(exchange='',
                             routing_key=os.environ['spring.rabbitmq.queue'],
                             properties=pika.BasicProperties(content_type='application/json'),
@@ -143,6 +147,7 @@ if __name__ == '__main__':
                 else:
                     logger.error('RabbitMQ is not connected at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
             except Exception as e:
+                logger.error('General error: ' + str(e))
                 logger.error('RabbitMQ connection is fail at ' + strftime("%d-%m-%Y %H:%M:%S", gmtime()))
 
             if is_connected:
