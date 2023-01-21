@@ -17,6 +17,7 @@ from time import strftime, gmtime
 import time
 import uuid
 from bluepy import btle
+import struct
 
 import pika
 
@@ -77,6 +78,7 @@ sys.stderr = MyLogger(logger, logging.ERROR)
 
 
 def float_value(nums):
+    logger.info(struct.unpack('<L', nums[0:2]))
     # check if temp is negative
     num = (nums[1] << 8) | nums[0]
     if nums[1] == 0xff:
