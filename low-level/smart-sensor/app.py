@@ -83,8 +83,8 @@ def float_value(nums):
     logger.info(format(nums[1], 'b'))
     logger.info((nums[1] & 0b10000000))
     logger.info(format((nums[1] & 0b10000000), 'b'))
-    logger.info((nums[1] & 0b10000000) >> 8)
-    logger.info(((nums[1] & 0b10000000) >> 8) is True)
+    logger.info((nums[1] & 0b10000000) >> 7)
+    logger.info(((nums[1] & 0b10000000) >> 7) is True)
     # check if temp is negative
     num = (nums[1] << 8) | nums[0]
     if nums[1] == 0xfc:
