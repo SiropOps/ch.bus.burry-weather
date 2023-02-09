@@ -89,7 +89,7 @@ class Data(object):
 
     def __init__(self, readings):
         self.temperature = float_value(readings[0:2])
-        self.humidity = float_value(readings[2:4])
+        self.humidity = 0 # disabled humidity for IBS-TH2 compatibility float_value(readings[2:4])
         self.battery = 0
 
     def __repr__(self):
