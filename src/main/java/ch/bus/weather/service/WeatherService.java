@@ -3,10 +3,12 @@ package ch.bus.weather.service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -168,17 +170,75 @@ public class WeatherService {
   }
 
   public List<OutsideDTO> getAllOutsides() {
-    return this.outsideRepository.findAll().stream().sorted().map(CopyBean::outside)
-        .collect(Collectors.toList());
+    List<OutsideDTO> list = this.outsideRepository.findAll().stream().sorted()
+        .map(CopyBean::outside).collect(Collectors.toList());
+
+    final List<OutsideDTO> listFinal = new ArrayList<>();
+
+    LocalDateTime startDateTime = list.stream().map(d -> d.getTime()).min(Date::compareTo)
+        .orElse(new Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    LocalDateTime endDateTime = list.stream().map(d -> d.getTime()).max(Date::compareTo)
+        .orElse(new Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+    Stream.iterate(startDateTime, d -> d.plusMinutes(15))
+        .limit((ChronoUnit.MINUTES.between(startDateTime, endDateTime) / 15) + 1).forEach(time -> {
+          List<OutsideDTO> subList = list.stream().filter(d -> {
+            return d.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                .isBefore(time);
+          }).collect(Collectors.toList());
+          list.removeAll(subList);
+
+          double averageTemp = subList.stream().map(d -> d.getTemperature())
+              .mapToDouble(Double::doubleValue).average().orElse(Double.NEGATIVE_INFINITY);
+
+          if (Double.NEGATIVE_INFINITY != averageTemp) {
+            OutsideDTO dto = new OutsideDTO();
+            dto.setTemperature(averageTemp);
+            dto.setTime(Date.from(time.atZone(ZoneId.systemDefault()).toInstant()));
+            listFinal.add(dto);
+          }
+        });
+
+    return listFinal;
   }
 
   public List<InsideDTO> getAllInsides() {
-    return this.insideRepository.findAll().stream().map((i) -> {
+
+    List<InsideDTO> list = this.insideRepository.findAll().stream().map((i) -> {
       i.setTime(Date.from(this.convertToLocalDateViaInstant(i.getTime())
           .truncatedTo(ChronoUnit.MINUTES).atZone(ZoneId.systemDefault()).toInstant()));
       return i;
     }).collect(Collectors.toMap(Inside::getTime, v -> v, (v1, v2) -> v1)).values().stream().sorted()
         .map(CopyBean::inside).collect(Collectors.toList());
+
+
+    final List<InsideDTO> listFinal = new ArrayList<>();
+
+    LocalDateTime startDateTime = list.stream().map(d -> d.getTime()).min(Date::compareTo)
+        .orElse(new Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    LocalDateTime endDateTime = list.stream().map(d -> d.getTime()).max(Date::compareTo)
+        .orElse(new Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+    Stream.iterate(startDateTime, d -> d.plusMinutes(15))
+        .limit((ChronoUnit.MINUTES.between(startDateTime, endDateTime) / 15) + 1).forEach(time -> {
+          List<InsideDTO> subList = list.stream().filter(d -> {
+            return d.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                .isBefore(time);
+          }).collect(Collectors.toList());
+          list.removeAll(subList);
+
+          double averageTemp = subList.stream().map(d -> d.getTemperature())
+              .mapToDouble(Double::doubleValue).average().orElse(Double.NEGATIVE_INFINITY);
+
+          if (Double.NEGATIVE_INFINITY != averageTemp) {
+            InsideDTO dto = new InsideDTO();
+            dto.setTemperature(averageTemp);
+            dto.setTime(Date.from(time.atZone(ZoneId.systemDefault()).toInstant()));
+            listFinal.add(dto);
+          }
+        });
+
+    return listFinal;
 
   }
 
@@ -188,8 +248,37 @@ public class WeatherService {
   }
 
   public List<MonlesiDTO> getAllMonlesis() {
-    return this.monlesiRepository.findAll().stream().sorted().map(CopyBean::monlesi)
-        .collect(Collectors.toList());
+
+    List<MonlesiDTO> list = this.monlesiRepository.findAll().stream().sorted()
+        .map(CopyBean::monlesi).collect(Collectors.toList());
+
+    final List<MonlesiDTO> listFinal = new ArrayList<>();
+
+    LocalDateTime startDateTime = list.stream().map(d -> d.getTime()).min(Date::compareTo)
+        .orElse(new Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    LocalDateTime endDateTime = list.stream().map(d -> d.getTime()).max(Date::compareTo)
+        .orElse(new Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+    Stream.iterate(startDateTime, d -> d.plusMinutes(15))
+        .limit((ChronoUnit.MINUTES.between(startDateTime, endDateTime) / 15) + 1).forEach(time -> {
+          List<MonlesiDTO> subList = list.stream().filter(d -> {
+            return d.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                .isBefore(time);
+          }).collect(Collectors.toList());
+          list.removeAll(subList);
+
+          double averageTemp = subList.stream().map(d -> d.getTemperature())
+              .mapToDouble(Double::doubleValue).average().orElse(Double.NEGATIVE_INFINITY);
+
+          if (Double.NEGATIVE_INFINITY != averageTemp) {
+            MonlesiDTO dto = new MonlesiDTO();
+            dto.setTemperature(averageTemp);
+            dto.setTime(Date.from(time.atZone(ZoneId.systemDefault()).toInstant()));
+            listFinal.add(dto);
+          }
+        });
+
+    return listFinal;
   }
 
 }
